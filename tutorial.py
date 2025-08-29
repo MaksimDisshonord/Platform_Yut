@@ -259,5 +259,38 @@ def collide(player, objects, dx):
 
 def handle_move(player, objects):
     keys = pygame.key.get_pressed()
+
+    player.x_vel = 0
+    collide_left = collide(player, objects, -PLAYER_VEL * 2)
+    collide_right = collide(player, objects, PLAYER_VEL * 2)
+
+    if keys[pygame.K_LEFT] and not collide_left:
+        player.move_left(PLAYER_VEL)
+    if keys[pygame.K_RIGHT] and not collide_right:
+        player.move_right(PLAYER_VEL)
+
+    vertical_collide = handle_vertical_collision(player, objects, player.y_vel)
+    to_check = [collide_left, collide_right, *vertical_collide]
+
+    for obj in to_check:
+        if obj and obj.name == "fire":
+            player.make_hit()
+
+
+def main(window):
+    clock = pygame.time.Clock()
+    background, bg_image = get_background("Blue.png")
+
+    block_size = 96
+
+    player = Player(100, 100, 50, 50)
+    fire = Fire(100, HEIGHT - block_size - 64, 16, 32)
+    fire.on()
+    floor = [Block(i * block_size, HEIGHT - block_size, block_size)
+             for i in range(-WIDTH // block_size, (WIDTH * 2) // block_size)]
+    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size),
+               Block(block_size * 3, HEIGHT - block_size * 4, block_size), fire]
+
+
 if __name__ == "__main__":
     main(window)
